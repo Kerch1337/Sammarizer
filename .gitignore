@@ -44,5 +44,5 @@ next-env.d.ts
 
 # 5pr
 /.venv
-/downloads
-/__pycache__
+summarizator/downloads
+summarizator/__pycache__
