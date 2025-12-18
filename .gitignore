@@ -40,3 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 /.vs
+
+
+# 5pr
+/.venv
+summarizator/downloads
+summarizator/__pycache__
