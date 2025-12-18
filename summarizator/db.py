@@ -16,6 +16,7 @@ Base = declarative_base()
 class Summary(Base):
     __tablename__ = "summaries"
     id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=True)
     url = Column(String, nullable=False)
     summary = Column(Text, nullable=False, default="")
     created_at = Column(DateTime, default = datetime.datetime.utcnow)

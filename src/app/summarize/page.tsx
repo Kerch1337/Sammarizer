@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { saveSummary } from "@/lib/mockStorage";
 import Spinner from "@/components/Spinner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -12,54 +11,91 @@ export default function Summarize() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+    const [summaryId, setSummaryId] = useState<string | null>(null);
+
   const router = useRouter();
 
-  function makeId() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  }
+    async function pollForSummary(id: number | string, onDone: () => void, onError?: (e: any) => void) {
+        const intervalMs = 5000;
+        const maxAttempts = 120;
+        let attempts = 0;
+        const timer = setInterval(async () => {
+            attempts += 1;
+            try {
+                const res = await fetch(`/api/get/get-one?id=${id}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.summary) {
+                        clearInterval(timer);
+                        onDone();
+                    }
+                } else if (res.status === 404) {
 
-  async function getVideoTitle(videoUrl: string): Promise<string> {
-    try {
-      const oEmbedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(
-        videoUrl
-      )}&format=json`;
+                } else {
+                    console.error("poll error", res.status);
+                }
+            } catch (e) {
+                console.error("poll exception", e);
+                if (onError) onError(e);
+            }
+            if (attempts >= maxAttempts) {
+                clearInterval(timer);
+                if (onError) onError(new Error("Timeout waiting for summary"));
+            }
+        }, intervalMs);
 
-      const res = await fetch(oEmbedUrl);
-      if (!res.ok) throw new Error("oEmbed failed");
-      const data = await res.json();
-      return data.title as string;
-    } catch {
-      return deriveTitleFromUrl(videoUrl) || "Видео";
+        return () => clearInterval(timer);
     }
-  }
 
-  function fakeSummaryFor(url: string) {
-    return `Автоматическая заглушка-суммаризация для ${url}. Здесь какой-то текст`;}
+    const onSummarize = async () => {
+        if (!url.trim()) {
+            setError("Пожалуйста, вставьте ссылку на видео");
+            return;
+        }
 
-  const onSummarize = async () => {
-    if (!url.trim()) {
-      setError("Пожалуйста, вставь ссылку на видео");
-      return;
-    }
+        setError(null);
+        setLoading(true);
 
-    setError(null);
-    setLoading(true);
+        try {
 
-    setTimeout(async () => {
-      const id = makeId();
-      const title = await getVideoTitle(url);
+            const res = await fetch("/api/post/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: url.trim() }),
+            });
 
-      saveSummary({
-        id,
-        title,
-        videoUrl: url.trim(),
-        summary: fakeSummaryFor(url),
-        createdAt: new Date().toISOString(),
-      });
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(`Ошибка сервера: ${res.status} ${text}`);
+            }
 
-      router.push(`/history/${id}`);
-    }, 1200);
-  };
+            const data = await res.json();
+            const id = data.id;
+
+            
+            setSummaryId(String(id));
+
+
+            await new Promise<void>((resolve, reject) => {
+                pollForSummary(
+                    id,
+                    () => {
+                        resolve();
+                    },
+                    (err) => reject(err)
+                );
+            });
+
+            router.push(`/history/${id}`);
+        } catch (err: any) {
+            console.error(err);
+            setError("Не удалось отправить запрос: " + (err.message || err));
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
   return (
     <div className="min-h-[85vh] flex flex-col items-center justify-center p-4">
@@ -91,6 +127,7 @@ export default function Summarize() {
             )}
           </div>
           <Button
+            type="button" 
             onClick={onSummarize}
             size="lg"
             disabled={loading}
@@ -107,20 +144,11 @@ export default function Summarize() {
           </Button>
           {loading && (
             <span className="text-sm text-muted-foreground">
-              Анализируем видео и выполняем суммаризацию…
+                          Анализируем видео и выполняем суммаризацию…  {summaryId ? `(ID вашей суммаризации: ${summaryId})` : ""}
             </span>
           )}
         </div>
       </div>
     </div>
   );
-}
-
-function deriveTitleFromUrl(url: string) {
-  try {
-    const u = new URL(url);
-    return u.hostname + u.pathname;
-  } catch {
-    return "";
-  }
 }
