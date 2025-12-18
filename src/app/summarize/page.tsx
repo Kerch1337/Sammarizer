@@ -1,4 +1,3 @@
-// src/app/summarize/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -35,11 +34,7 @@ export default function Summarize() {
   }
 
   function fakeSummaryFor(url: string) {
-    return `Автоматическая заглушка-суммаризация для ${url}. Ключевые моменты:
-1) Введение
-2) Основные идеи
-3) Выводы`;
-  }
+    return `Автоматическая заглушка-суммаризация для ${url}. Здесь какой-то текст`;}
 
   const onSummarize = async () => {
     if (!url.trim()) {
@@ -69,15 +64,12 @@ export default function Summarize() {
   return (
     <div className="min-h-[85vh] flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-2xl text-center">
-        {/* Заголовок */}
         <h1 className="text-3xl font-semibold mb-2">
           Суммаризация видео
         </h1>
         <p className="text-sm text-muted-foreground mb-6">
           Вставьте ссылку на видео в поле ниже:
         </p>
-
-        {/* Форма */}
         <div className="flex flex-col gap-3 items-center">
           <div className="w-full">
             <Input
@@ -92,16 +84,12 @@ export default function Summarize() {
                 error && "border-red-500 focus-visible:ring-red-500/30"
               )}
             />
-
-            {/* Сообщение об ошибке */}
             {error && (
               <p className="text-left mt-1 text-sm text-red-600">
                 {error}
               </p>
             )}
           </div>
-
-          {/* Кнопка */}
           <Button
             onClick={onSummarize}
             size="lg"
@@ -117,8 +105,6 @@ export default function Summarize() {
               "Summarize"
             )}
           </Button>
-
-          {/* Подпись под кнопкой при загрузке */}
           {loading && (
             <span className="text-sm text-muted-foreground">
               Анализируем видео и выполняем суммаризацию…

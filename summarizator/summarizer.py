@@ -12,6 +12,7 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 DOWNLOAD_DIR = os.environ.get("DOWNLOAD_DIR", "downloads")
 
 
+
 def download_video(url: str, out_dir: str = "downloads") -> Path:
     out_dir_p = Path(out_dir)
     out_dir_p.mkdir(parents=True, exist_ok=True)

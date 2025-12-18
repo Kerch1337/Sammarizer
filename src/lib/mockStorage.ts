@@ -1,10 +1,9 @@
-// src/lib/mockStorage.ts
 export type Summary = {
   id: string;
   title: string;
   videoUrl: string;
   summary: string;
-  createdAt: string; // ISO string
+  createdAt: string;
 };
 
 const KEY = "summaries_v1";

@@ -1,4 +1,3 @@
-// src/app/history/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -20,7 +19,7 @@ export default function History() {
         <h1 className="text-2xl font-semibold mb-4">История суммаризаций</h1>
 
         {items.length === 0 ? (
-          <div className="text-center text-muted-foreground">Пока нет суммаризаций</div>
+          <div className="text-center text-muted-foreground">Выполненых суммаризаций нет</div>
         ) : (
           <ul className="flex flex-col gap-3">
             {items.map((it) => (
