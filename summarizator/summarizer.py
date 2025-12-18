@@ -64,8 +64,8 @@ def transcribe_audio_wisper(audio_path: Path, model_size: str = 'small', languag
 
 
 def summarize_text(text):
-    tokenizer = AutoTokenizer.from_pretrained("LaciaStudio/Lacia_sum_small_v1")
-    model = AutoModelForSeq2SeqLM.from_pretrained("LaciaStudio/Lacia_sum_small_v1")
+    tokenizer = AutoTokenizer.from_pretrained("2KKLabs/Lacia_sum_small_v1")
+    model = AutoModelForSeq2SeqLM.from_pretrained("2KKLabs/Lacia_sum_small_v1")
 
     input_text = "summarize: " + text
     inputs = tokenizer(input_text, return_tensors="pt", max_length=512, truncation=True)
